@@ -1,4 +1,5 @@
 import { useLocation } from "react-router-dom";
+import { useState } from "react";
 
 const menuItems = [
   {
@@ -73,75 +74,117 @@ const menuItems = [
 
 export const Sidebar = () => {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
 
   return (
-    <div className="w-64 h-full bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900 border-r border-white/10 flex flex-col">
-      
-      <div className="p-6 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center shadow-lg">
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+    <>
+      {/* Mobile menu button */}
+      <button 
+        onClick={toggleMobileMenu}
+        className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-gradient-to-br from-slate-800 to-purple-800 rounded-xl border border-white/10 shadow-lg"
+      >
+        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          {isMobileMenuOpen ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          )}
+        </svg>
+      </button>
+
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+          onClick={toggleMobileMenu}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        fixed lg:static 
+        inset-y-0 left-0 
+        w-64 h-full 
+        bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900 
+        border-r border-white/10 
+        flex flex-col 
+        z-40
+        transform transition-transform duration-300 ease-in-out
+        lg:transform-none
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        
+        <div className="p-6 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center shadow-lg">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-white tracking-tight">CRM</h2>
+              <p className="text-xs text-slate-400">Portal</p>
+            </div>
+          </div>
+        </div>
+
+        <nav className="flex-1 p-4 space-y-2">
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.href || (item.id === "customers" && location.pathname === "/");
+            
+            return (
+              <a
+                key={item.id}
+                href={item.href}
+                onClick={() => setIsMobileMenuOpen(false)} // Close mobile menu on link click
+                className={`group flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 ${
+                  isActive
+                    ? "bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/30 text-cyan-300"
+                    : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`transition-colors duration-300 ${
+                    isActive ? "text-cyan-400" : "text-slate-400 group-hover:text-cyan-400"
+                  }`}>
+                    {item.icon}
+                  </div>
+                  <span className="font-medium">{item.label}</span>
+                </div>
+                
+                {item.badge && (
+                  <div className={`px-2 py-1 text-xs font-bold rounded-full ${
+                    isActive 
+                      ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/30"
+                      : "bg-slate-700 text-slate-300"
+                  }`}>
+                    {item.badge}
+                  </div>
+                )}
+              </a>
+            );
+          })}
+        </nav>
+
+        <div className="p-4 border-t border-white/10">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800/70 transition-colors duration-300 cursor-pointer">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center shadow-lg">
+              <span className="text-sm font-bold text-white">AD</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">Admin User</p>
+              <p className="text-xs text-slate-400 truncate">admin@crm.com</p>
+            </div>
+            <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </div>
-          <div>
-            <h2 className="text-lg font-black text-white tracking-tight">CRM</h2>
-            <p className="text-xs text-slate-400">Portal</p>
-          </div>
         </div>
       </div>
-
-      <nav className="flex-1 p-4 space-y-2">
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.href || (item.id === "customers" && location.pathname === "/");
-          
-          return (
-            <a
-              key={item.id}
-              href={item.href}
-              className={`group flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 ${
-                isActive
-                  ? "bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/30 text-cyan-300"
-                  : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`transition-colors duration-300 ${
-                  isActive ? "text-cyan-400" : "text-slate-400 group-hover:text-cyan-400"
-                }`}>
-                  {item.icon}
-                </div>
-                <span className="font-medium">{item.label}</span>
-              </div>
-              
-              {item.badge && (
-                <div className={`px-2 py-1 text-xs font-bold rounded-full ${
-                  isActive 
-                    ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/30"
-                    : "bg-slate-700 text-slate-300"
-                }`}>
-                  {item.badge}
-                </div>
-              )}
-            </a>
-          );
-        })}
-      </nav>
-
-      <div className="p-4 border-t border-white/10">
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800/70 transition-colors duration-300 cursor-pointer">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center shadow-lg">
-            <span className="text-sm font-bold text-white">AD</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">Admin User</p>
-            <p className="text-xs text-slate-400 truncate">admin@crm.com</p>
-          </div>
-          <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </div>
-    </div>
+    </>
   );
 };
